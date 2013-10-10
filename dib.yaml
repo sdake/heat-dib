@@ -49,7 +49,6 @@ resources:
           FromPort: '22'
           ToPort : '22'
           CidrIp : '0.0.0.0/0'
-
   dib_instance:
     type: OS::Nova::Server
     Metadata:
@@ -78,9 +77,22 @@ resources:
             export OS_AUTH_URL=$OS_AUTH_URL
             export SERVICE_HOST=$SERVICE_HOST
             glance image-create --name=test --disk-format=qcow2 --container-format=bare < /image.qcow2
+            /opt/aws/bin/cfn-signal -e 0 -r "dib completed" "WAIT_HANDLE"
+
           params:
             $OS_USERNAME: { get_param: os_username }
             $OS_TENANT_NAME: { get_param: os_tenant_name }
             $OS_PASSWORD: { get_param: os_password }
             $SERVICE_HOST: { get_param: service_host }
             $OS_AUTH_URL: { get_param: os_auth_url }
+            WAIT_HANDLE: { get_resource: wait_handle }
+
+  wait_handle:
+    type: AWS::CloudFormation::WaitConditionHandle
+  wait_condition:
+    type: AWS::CloudFormation::WaitCondition
+    Properties:
+      Handle: { Ref: wait_handle }
+      Count: '1'
+      Timeout: '6000'
+
