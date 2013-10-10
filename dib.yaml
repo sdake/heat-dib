@@ -17,6 +17,9 @@ parameters:
   os_auth_url:
     type: string
     description: OpenStack password
+  dib_image_name:
+    type: string
+    description: Image to register with glance
   key_name:
     type: string
     description : Name of a KeyPair to enable SSH access to the instance
@@ -72,7 +75,7 @@ resources:
             export OS_TENANT_NAME=$OS_TENANT_NAME
             export OS_PASSWORD=$OS_PASSWORD
             export OS_AUTH_URL=$OS_AUTH_URL
-            glance image-create --name=test --disk-format=qcow2 --container-format=bare < /image.qcow2
+            glance image-create --name="DIB_IMAGE_NAME" --disk-format=qcow2 --container-format=bare < /image.qcow2
             /opt/aws/bin/cfn-signal -e 0 -r "dib completed" "WAIT_HANDLE"
 
           params:
@@ -81,6 +84,7 @@ resources:
             $OS_PASSWORD: { get_param: os_password }
             $OS_AUTH_URL: { get_param: os_auth_url }
             WAIT_HANDLE: { get_resource: wait_handle }
+            DIB_IMAGE_NAME: { get_param: dib_image_name }
 
   wait_handle:
     type: AWS::CloudFormation::WaitConditionHandle
