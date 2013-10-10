@@ -1,32 +1,31 @@
 #!/usr/bin/env python
 
+import json
 import yaml
 
 def parse(template):
     return yaml.safe_load(template)
 
-yaml_content = dict()
 dib_template = open('dib.yaml', 'r')
 dib_yaml = parse(dib_template)
 template_file = open('OpenShift.yaml', 'r')
 template_yaml = parse(template_file)
 for res in template_yaml['resources']:
     if template_yaml['resources'][res]['type'] == 'OS::Nova::Server':
-        rsrc = template_yaml['resources'][res]
-        rsrc_init = rsrc['Metadata']
-        print rsrc_init
-        packages = rsrc_init['AWS::CloudFormation::Init']['config']['packages']['yum']
-        content = '#!/bin/bash\n\nset -e\ninstall-packages '
-        for package in packages:
-            content = content + package
-        filename = '/elements/' + res + '/install.d/30-' + res
-        yaml_content[res] = {'%s' % filename: \
-            {'content': rsrc_init, 'mode': '00400', 'owner': 'root', \
-            'group': 'root'}}
+        # build install script
+        content = '#!/bin/bash\n\nset -e\ninstall-packages heat-cfntools\n'
+        content = content + 'install -D /tmp/in_target.d/install.d/metadata /var/lib/heat-cfntools/cfn-init-data\n\n'
+        content = content + '/usr/bin/cfn-init\n\n'
 
-for res in yaml_content:
-    files = list()
-    files.append(yaml_content[res])
-    new_yaml = {'config': {'files': files}}
-#    print yaml.dump(new_yaml)
+        yaml_content_dib = {'/elements/dibt/install.d/30-dibt': {'content': content, 'mode': '00755', 'owner': 'root', 'group': 'root'}}
 
+        yaml_content_metadata = {'/elements/dibt/install.d/metadata': {'content': json.dumps(template_yaml['resources'][res]['Metadata'])}}
+            
+files = {}
+files.update(yaml_content_dib)
+files.update(yaml_content_metadata)
+for res in dib_yaml['resources']:
+    if dib_yaml['resources'][res]['type'] == 'OS::Nova::Server':
+        dib_yaml['resources'][res]['Metadata']['AWS::CloudFormation::Init']['config']['files'] = files
+
+        print yaml.dump(dib_yaml)
