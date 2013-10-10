@@ -14,9 +14,6 @@ parameters:
   os_password:
     type: string
     description: OpenStack password
-  service_host:
-    type: string
-    description: OpenStack glance service IP
   os_auth_url:
     type: string
     description: OpenStack password
@@ -75,7 +72,6 @@ resources:
             export OS_TENANT_NAME=$OS_TENANT_NAME
             export OS_PASSWORD=$OS_PASSWORD
             export OS_AUTH_URL=$OS_AUTH_URL
-            export SERVICE_HOST=$SERVICE_HOST
             glance image-create --name=test --disk-format=qcow2 --container-format=bare < /image.qcow2
             /opt/aws/bin/cfn-signal -e 0 -r "dib completed" "WAIT_HANDLE"
 
@@ -83,7 +79,6 @@ resources:
             $OS_USERNAME: { get_param: os_username }
             $OS_TENANT_NAME: { get_param: os_tenant_name }
             $OS_PASSWORD: { get_param: os_password }
-            $SERVICE_HOST: { get_param: service_host }
             $OS_AUTH_URL: { get_param: os_auth_url }
             WAIT_HANDLE: { get_resource: wait_handle }
 
