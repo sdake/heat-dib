@@ -425,9 +425,9 @@ resources:
   node_instance:
     type: OS::Nova::Server
     Metadata:
-    AWS::CloudFormation::Init:
-       config:
-         packages:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
            yum:
              ntp: []
              git: []
