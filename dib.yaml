@@ -1,0 +1,85 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This template loads diskimage-builder in Fedora 19 and processes an
+  existing template into a pre-built diskimage built template.
+
+parameters:
+  os_username:
+    type: string
+    description: OpenStack username
+  os_tenant_name:
+    type: string
+    description: OpenStack tenant name
+  os_password:
+    type: string
+    description: OpenStack password
+  service_host:
+    type: string
+    description: OpenStack glance service IP
+  os_auth_url:
+    type: string
+    description: OpenStack password
+  key_name:
+    type: string
+    description : Name of a KeyPair to enable SSH access to the instance
+  instance_type:
+    type: string
+    description: Instance type for WordPress server
+    default: m1.large
+    constraints:
+      - allowed_values: [m1.small, m1.medium, m1.large]
+        description: instance_type must be one of m1.small, m1.medium or m1.large
+
+resources:
+  dib_securitygroup:
+    type: AWS::EC2::SecurityGroup
+    properties:
+      GroupDescription: 'Enable HTTP access via port 80 plus SSH access'
+      SecurityGroupIngress:
+        - IpProtocol: 'icmp'
+          FromPort: '-1'
+          ToPort: '-1'
+          CidrIp: '0.0.0.0/0'
+        - IpProtocol: 'tcp'
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: '0.0.0.0/0'
+        - IpProtocol: 'tcp'
+          FromPort: '22'
+          ToPort : '22'
+          CidrIp : '0.0.0.0/0'
+
+  dib_instance:
+    type: OS::Nova::Server
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              diskimage-builder: []
+              python-glanceclient: []
+    properties:
+      image: 'F19-x86_64-cfntools'
+      flavor: { get_param: instance_type }
+      key_name: { get_param: key_name }
+      security_groups:
+        - get_resource: dib_securitygroup
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            cfn-init
+            disk-image-create fedora vm
+            export OS_USERNAME=$OS_USERNAME
+            export OS_TENANT_NAME=$OS_TENANT_NAME
+            export OS_PASSWORD=$OS_PASSWORD
+            export OS_AUTH_URL=$OS_AUTH_URL
+            export SERVICE_HOST=$SERVICE_HOST
+            glance image-create --name=test --disk-format=qcow2 --container-format=bare < /image.qcow2
+          params:
+            $OS_USERNAME: { get_param: os_username }
+            $OS_TENANT_NAME: { get_param: os_tenant_name }
+            $OS_PASSWORD: { get_param: os_password }
+            $SERVICE_HOST: { get_param: service_host }
+            $OS_AUTH_URL: { get_param: os_auth_url }
