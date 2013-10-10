@@ -9,4 +9,7 @@ using Fedora 19's diskimage-builder and load it into glance.
 Instructions
 ============
 source devstack/openrc admin admin
-source ./run
+python dib.py
+
+At the moment the code only registers the image with glance, but does not create
+a new template to use with it.

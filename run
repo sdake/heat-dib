@@ -1,3 +1,0 @@
-python dib.py > dibz
-heat create dibz --template-file dibz --parameters="key_name=goofy;os_username=$OS_USERNAME;os_tenant_name=$OS_TENANT_NAME;os_password=$OS_PASSWORD;os_auth_url=$OS_AUTH_URL;service_host=$SERVICE_HOST"
-
