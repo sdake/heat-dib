@@ -26,7 +26,7 @@ parameters:
   instance_type:
     type: string
     description: Instance type for WordPress server
-    default: m1.large
+    default: m1.small
     constraints:
       - allowed_values: [m1.small, m1.medium, m1.large]
         description: instance_type must be one of m1.small, m1.medium or m1.large
@@ -70,7 +70,8 @@ resources:
           template: |
             #!/bin/bash -v
             cfn-init
-            disk-image-create fedora vm
+            export ELEMENTS_PATH=/elements
+            disk-image-create fedora vm dibt
             export OS_USERNAME=$OS_USERNAME
             export OS_TENANT_NAME=$OS_TENANT_NAME
             export OS_PASSWORD=$OS_PASSWORD
