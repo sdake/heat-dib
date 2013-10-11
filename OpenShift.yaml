@@ -53,12 +53,12 @@ resources:
     type: AWS::CloudFormation::WaitConditionHandle
   BrokerWaitCondition:
     type: AWS::CloudFormation::WaitCondition
-    DependsOn: broker_server
+    DependsOn: openshift_broker_instance
     Properties:
       Handle:
         Ref: BrokerWaitHandle
       Timeout: '6000'
-  broker_server:
+  openshift_broker_instance:
     type: OS::Nova::Server
     Metadata:
       AWS::CloudFormation::Init:
@@ -88,7 +88,7 @@ resources:
               facter: []
     properties:
       image: 'F19-x86_64-cfntools'
-      flavor: { get_param: broker_server_flavor }
+      flavor: { get_param: openshift_broker_instance }
       key_name: { get_param: key_name }
       security_groups: [{ get_resource: openshift_origin_security_group }]
       user_data:
@@ -422,7 +422,7 @@ resources:
             OPENSHIFT_USER: { get_param: openshift_user }
             OPENSHIFT_PASSWORD: { get_param: openshift_password }
 
-  node_instance:
+  openshift_node_instance:
     type: OS::Nova::Server
     Metadata:
       AWS::CloudFormation::Init:
@@ -669,18 +669,18 @@ resources:
                 setenforce 0
           params:
             DOMAIN: { get_param: prefix }
-            BROKERIP: { get_attr: [ broker_server, first_address ] }
+            BROKERIP: { get_attr: [ openshift_broker_instance, first_address ] }
 
 outputs:
   OpenShiftConsole:
     Value:
       Fn::Join:
       - ''
-      - ['https://', 'Fn::GetAtt': [broker_server, PublicIp], '/console']
+      - ['https://', 'Fn::GetAtt': [openshift_broker_instance, PublicIp], '/console']
     description: URL for OpenShift Origins console
   NameServerEntry:
     Value:
       Fn::Join:
       - ''
-      - ['nameserver ', 'Fn::GetAtt': [broker_server, PublicIp]]
+      - ['nameserver ', 'Fn::GetAtt': [openshift_broker_instance, PublicIp]]
     description: Entry to insert into /etc/resolv.conf for application host names to resolve
