@@ -44,9 +44,9 @@ for res in template_yaml['resources']:
         files = {}
         files.update(yaml_content_dib)
         files.update(yaml_content_metadata)
-        for res in dib_yaml['resources']:
-            if dib_yaml['resources'][res]['type'] == 'OS::Nova::Server':
-                dib_yaml['resources'][res]['Metadata']['AWS::CloudFormation::Init']['config']['files'] = files
+        for res_dib in dib_yaml['resources']:
+            if dib_yaml['resources'][res_dib]['type'] == 'OS::Nova::Server':
+                dib_yaml['resources'][res_dib]['Metadata']['AWS::CloudFormation::Init']['config']['files'] = files
 
                 # create dib stacks for all server resources in this stack
 
