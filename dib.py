@@ -57,7 +57,7 @@ for res in template_yaml['resources']:
                 	     'os_password': os.environ['OS_PASSWORD'],
                 	     'os_tenant_name': os.environ['OS_TENANT_NAME'],
                 	     'os_auth_url': os.environ['OS_AUTH_URL'],
-                	     'dib_image_name': stack_name,
+                	     'dib_image_name': res,
                 	     'key_name': 'goofy'},
                 	     'timeout_mins': 6000,
                 	     'disable_rollback': True}
