@@ -16,7 +16,7 @@ parameters:
     description: OpenStack password
   os_auth_url:
     type: string
-    description: OpenStack password
+    description: OpenStack auth url
   dib_image_name:
     type: string
     description: Image to register with glance
