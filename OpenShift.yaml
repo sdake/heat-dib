@@ -23,13 +23,13 @@ parameters:
     description: Upstream DNS server
     type: String
     default: 8.8.8.8
-  broker_server_flavor:
+  broker_flavor:
     description: Flavor of broker server
     type: String
     default: m1.small
     allowed_values: [m1.small, m1.medium, m1.large, m1.xlarge]
     Constraintdescription: Must be a valid server flavor
-  NodeServerFlavor:
+  node_flavor:
     description: Flavor of node servers
     type: String
     default: m1.small
@@ -88,7 +88,7 @@ resources:
               facter: []
     properties:
       image: 'F19-x86_64-cfntools'
-      flavor: { get_param: openshift_broker_instance }
+      flavor: { get_param: broker_flavor }
       key_name: { get_param: key_name }
       security_groups: [{ get_resource: openshift_origin_security_group }]
       user_data:
@@ -445,7 +445,7 @@ resources:
              facter: []
     properties:
       image: 'F19-x86_64-cfntools'
-      flavor: { get_param: NodeServerFlavor }
+      flavor: { get_param: node_flavor }
       key_name: { get_param: key_name }
       security_groups: [{ get_resource: openshift_origin_security_group }]
       user_data:
