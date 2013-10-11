@@ -7,6 +7,7 @@ from keystoneclient.v2_0 import client as ks_client
 import heatclient
 from heatclient import client as heat_client
 import uuid
+import hashlib
 
 def parse(template):
     return yaml.safe_load(template)
@@ -30,6 +31,13 @@ dib_template = open('dib.yaml', 'r')
 dib_yaml = parse(dib_template)
 template_file = open('OpenShift.yaml', 'r')
 template_yaml = parse(template_file)
+m = hashlib.md5()
+m.update(yaml.dump(template_yaml))
+dib_name = 'dib_' + m.hexdigest() 
+
+outfile_name = 'OpenShiftDib.yaml'
+new_yaml = open(outfile_name, 'w')
+
 for res in template_yaml['resources']:
     if template_yaml['resources'][res]['type'] == 'OS::Nova::Server':
         # build install script
@@ -57,8 +65,14 @@ for res in template_yaml['resources']:
                 	     'os_password': os.environ['OS_PASSWORD'],
                 	     'os_tenant_name': os.environ['OS_TENANT_NAME'],
                 	     'os_auth_url': os.environ['OS_AUTH_URL'],
-                	     'dib_image_name': res,
+                	     'dib_image_name': dib_name + res,
                 	     'key_name': 'goofy'},
                 	     'timeout_mins': 6000,
                 	     'disable_rollback': True}
                 hc.stacks.create(**kwargs)
+        del template_yaml['resources'][res]['Metadata']
+        template_yaml['resources'][res]['properties']['image'] = "'" + dib_name + res + "'"
+
+# output new template
+print 'Writing new template in %s.' % outfile_name
+new_yaml.write(yaml.dump(template_yaml))
