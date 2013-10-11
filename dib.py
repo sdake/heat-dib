@@ -50,7 +50,8 @@ for res in template_yaml['resources']:
 
                 # create dib stacks for all server resources in this stack
 
-                stack_name =  'dib' + str(uuid.uuid4()).replace('-', '_')
+                stack_name =  ('dib_' + str(uuid.uuid4()).replace('-', '_'))[:20]
+
                 kwargs ={'stack_name': stack_name, 'template': yaml.dump(dib_yaml),
                 	 'parameters': {'os_username': os.environ['OS_USERNAME'],
                 	     'os_password': os.environ['OS_PASSWORD'],
@@ -58,6 +59,6 @@ for res in template_yaml['resources']:
                 	     'os_auth_url': os.environ['OS_AUTH_URL'],
                 	     'dib_image_name': stack_name,
                 	     'key_name': 'goofy'},
-                             'timeout_mins': '6000',
-                             'disable_rollback': True}
+                	     'timeout_mins': 6000,
+                	     'disable_rollback': True}
                 hc.stacks.create(**kwargs)
